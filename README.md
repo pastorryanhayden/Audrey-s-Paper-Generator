@@ -19,9 +19,85 @@ A Laravel application that converts markdown input into properly formatted Turab
 
 - PHP 8.2 or higher
 - Composer
-- Laravel 12.x
+- Pandoc (for PDF generation)
+- LaTeX (TeX Live or MacTeX)
 
-## Installation
+## System Installation
+
+### Linux (Ubuntu/Debian)
+
+```bash
+# Install PHP and required extensions
+sudo apt-get update
+sudo apt-get install php php-cli php-mbstring php-xml php-curl php-zip unzip
+
+# Install Composer
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+
+# Install Pandoc
+sudo apt-get install pandoc
+
+# Install LaTeX (required for PDF generation)
+sudo apt-get install texlive-latex-base texlive-latex-extra texlive-fonts-recommended
+```
+
+### Linux (Fedora/RHEL)
+
+```bash
+# Install PHP and required extensions
+sudo dnf install php php-cli php-mbstring php-xml php-curl php-zip unzip
+
+# Install Composer
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+
+# Install Pandoc
+sudo dnf install pandoc
+
+# Install LaTeX
+sudo dnf install texlive-scheme-basic texlive-collection-latexextra texlive-collection-fontsrecommended
+```
+
+### macOS
+
+```bash
+# Install Homebrew if not already installed
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install PHP
+brew install php
+
+# Install Composer
+brew install composer
+
+# Install Pandoc
+brew install pandoc
+
+# Install LaTeX (BasicTeX is smaller, MacTeX is full installation)
+# Option 1: BasicTeX (smaller, ~100MB) - then install extra packages
+brew install --cask basictex
+# After installation, add to PATH and install required packages:
+eval "$(/usr/libexec/path_helper)"
+sudo tlmgr update --self
+sudo tlmgr install collection-latexextra collection-fontsrecommended
+
+# Option 2: MacTeX (full installation, ~4GB)
+brew install --cask mactex
+```
+
+### Verify Installation
+
+After installing the system dependencies, verify they're working:
+
+```bash
+php --version          # Should show PHP 8.2+
+composer --version     # Should show Composer version
+pandoc --version       # Should show Pandoc version
+pdflatex --version     # Should show pdfTeX version
+```
+
+## Application Installation
 
 1. **Clone the repository** (or copy the project files):
    ```bash
@@ -39,12 +115,18 @@ A Laravel application that converts markdown input into properly formatted Turab
    php artisan key:generate
    ```
 
-4. **Start the development server**:
+4. **Create storage directories**:
+   ```bash
+   mkdir -p storage/app/temp
+   chmod -R 775 storage
+   ```
+
+5. **Start the development server**:
    ```bash
    php artisan serve
    ```
 
-5. **Access the application**:
+6. **Access the application**:
    Open your browser and navigate to `http://localhost:8000`
 
 ## Usage
@@ -140,24 +222,31 @@ turabian-generator/
 ├── app/
 │   ├── Http/
 │   │   └── Controllers/
-│   │       └── PaperController.php    # Main controller
+│   │       └── PaperController.php      # Main controller
 │   └── Services/
-│       └── TurabianParser.php         # Markdown parser
+│       ├── TurabianParser.php           # Markdown parser
+│       └── PandocPdfGenerator.php       # PDF generation via Pandoc
 ├── resources/
+│   ├── templates/
+│   │   └── turabian.latex               # LaTeX template for Turabian formatting
 │   └── views/
 │       └── paper/
-│           ├── form.blade.php         # Input form
-│           └── pdf.blade.php          # PDF template
+│           ├── form.blade.php           # Input form
+│           ├── print.blade.php          # Print-to-PDF template
+│           └── pdf.blade.php            # Preview template
 ├── routes/
-│   └── web.php                        # Route definitions
-├── example.md                         # Example markdown document
-└── README.md                          # This file
+│   └── web.php                          # Route definitions
+├── storage/
+│   └── app/
+│       └── temp/                        # Temporary files for PDF generation
+└── README.md                            # This file
 ```
 
 ## Dependencies
 
 - [Laravel 12.x](https://laravel.com/) - PHP Framework
-- [barryvdh/laravel-dompdf](https://github.com/barryvdh/laravel-dompdf) - PDF Generation
+- [Pandoc](https://pandoc.org/) - Universal document converter (system dependency)
+- [TeX Live](https://tug.org/texlive/) / [MacTeX](https://tug.org/mactex/) - LaTeX distribution for PDF rendering
 - [league/commonmark](https://commonmark.thephpleague.com/) - Markdown Parsing (included with Laravel)
 
 ## License

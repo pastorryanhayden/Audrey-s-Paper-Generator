@@ -1,0 +1,115 @@
+\documentclass[$if(fontsize)$$fontsize$,$endif$]{article}
+
+% Page geometry - 1 inch margins
+\usepackage[margin=1in]{geometry}
+
+% Times New Roman font
+\usepackage{mathptmx}
+
+% Double spacing
+\usepackage{setspace}
+\doublespacing
+
+% For headers/footers and page numbering
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+% For title page
+\usepackage{titling}
+
+% Paragraph indentation
+\usepackage{indentfirst}
+\setlength{\parindent}{0.5in}
+
+% No extra space between paragraphs
+\setlength{\parskip}{0pt}
+
+% Footnotes - Turabian style
+% First line indented 0.5in, number at start, single-spaced
+\usepackage[bottom]{footmisc}
+\setlength{\footnotemargin}{0.5in}
+\renewcommand{\footnotelayout}{\singlespacing}
+% Make footnote numbers full-size (not superscript)
+\renewcommand{\thefootnote}{\arabic{footnote}}
+\makeatletter
+\renewcommand\@makefntext[1]{%
+  \setlength{\parindent}{0.5in}%
+  \noindent\hspace{0.5in}\@thefnmark.\space #1}
+\makeatother
+
+% Bibliography formatting
+\usepackage{hanging}
+
+% Hyperlinks (optional, for TOC)
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=false,
+    pdfborder={0 0 0}
+}
+
+% For afterpage command
+\usepackage{afterpage}
+
+% Section formatting - no numbering
+\setcounter{secnumdepth}{0}
+
+% Custom title page
+\newcommand{\maketitlepage}{
+    \thispagestyle{empty}
+    \begin{center}
+    \vspace*{2.5in}
+    \textbf{$title$}
+
+    % 8 blank lines (carriage returns) between title and student info
+    \vspace{8\baselineskip}
+
+    % Student info section - single spaced
+    \begin{singlespace}
+    $author$
+
+    $if(course)$
+    $course$
+    $endif$
+
+    $if(date)$
+    $date$
+    $endif$
+    \end{singlespace}
+    \end{center}
+    \newpage
+}
+
+% Page styles
+\fancypagestyle{firstcontent}{
+    \fancyhf{}
+    \fancyfoot[C]{\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}
+}
+
+\fancypagestyle{subsequent}{
+    \fancyhf{}
+    \fancyhead[R]{\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}
+}
+
+\begin{document}
+
+% Title page (no page number shown, but counts as page i)
+\maketitlepage
+
+% First content page - page number at bottom center
+\thispagestyle{firstcontent}
+\pagestyle{subsequent}
+\setcounter{page}{1}
+
+\begin{center}
+\MakeUppercase{$title$}
+\end{center}
+
+\vspace{0.25in}
+
+$body$
+
+\end{document}

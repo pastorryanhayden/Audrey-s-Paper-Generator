@@ -88,9 +88,9 @@
 
             <!-- Submit Buttons -->
             <div class="flex flex-col sm:flex-row gap-4">
-                <button type="submit" formaction="{{ route('paper.generate') }}" formtarget="_blank"
-                        class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
-                    Generate PDF (Print Dialog)
+                <button type="submit" formaction="{{ route('paper.download') }}"
+                        class="flex-1 bg-green-600 text-white py-3 px-6 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors font-medium">
+                    Download PDF
                 </button>
                 <button type="submit" formaction="{{ route('paper.preview') }}" formtarget="_blank"
                         class="flex-1 bg-gray-600 text-white py-3 px-6 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors font-medium">
