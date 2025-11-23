@@ -80,6 +80,13 @@
 }
 
 % Page styles
+\fancypagestyle{toc}{
+    \fancyhf{}
+    \fancyfoot[C]{\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}
+}
+
 \fancypagestyle{firstcontent}{
     \fancyhf{}
     \fancyfoot[C]{\thepage}
@@ -94,15 +101,32 @@
     \renewcommand{\footrulewidth}{0pt}
 }
 
+% TOC formatting - remove dots, adjust spacing
+\usepackage{tocloft}
+\renewcommand{\cftdotsep}{\cftnodots}
+\renewcommand{\cftsecfont}{\normalfont}
+\renewcommand{\cftsecpagefont}{\normalfont}
+\setlength{\cftbeforesecskip}{0pt}
+
 \begin{document}
 
 % Title page (no page number shown, but counts as page i)
+\pagenumbering{roman}
 \maketitlepage
 
-% First content page - page number at bottom center
+% Table of Contents page(s) - Roman numerals at bottom center
+\pagestyle{toc}
+\begin{center}
+\textbf{TABLE OF CONTENTS}
+\end{center}
+\vspace{0.25in}
+\tableofcontents
+\newpage
+
+% First content page - switch to Arabic numerals, page number at bottom center
+\pagenumbering{arabic}
 \thispagestyle{firstcontent}
 \pagestyle{subsequent}
-\setcounter{page}{1}
 
 \begin{center}
 \MakeUppercase{$title$}
