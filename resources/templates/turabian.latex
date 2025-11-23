@@ -136,4 +136,23 @@
 
 $body$
 
+$if(bibliography)$
+% Bibliography page - new page, title centered in ALL CAPS
+\newpage
+\begin{center}
+BIBLIOGRAPHY
+\end{center}
+
+\vspace{0.25in}
+
+% Single-spaced entries with double-space between, hanging indent
+\begin{singlespace}
+$for(bibliography)$
+\noindent\hangindent=0.5in $bibliography$
+
+\vspace{\baselineskip}
+$endfor$
+\end{singlespace}
+$endif$
+
 \end{document}

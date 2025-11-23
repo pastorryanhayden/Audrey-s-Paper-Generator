@@ -22,7 +22,12 @@ class PandocPdfGenerator
      */
     public function generate(array $data): string
     {
-        $markdown = $this->buildMarkdown($data);
+        // Extract bibliography entries first
+        $rawContent = $data['rawContent'] ?? '';
+        $bibliography = [];
+        $rawContent = $this->extractBibliography($rawContent, $bibliography);
+
+        $markdown = $rawContent;
         $tempMd = $this->tempDir . '/' . Str::uuid() . '.md';
         $tempPdf = $this->tempDir . '/' . Str::uuid() . '.pdf';
 
@@ -54,10 +59,22 @@ class PandocPdfGenerator
             $command[] = 'date=' . $this->escapeLatex($data['date']);
         }
 
+        // Add bibliography entries (already escaped in extractBibliography)
+        foreach ($bibliography as $entry) {
+            $command[] = '-V';
+            $command[] = 'bibliography=' . $entry;
+        }
+
+        $commandString = implode(' ', array_map('escapeshellarg', $command));
+
+        // Debug: log the command
+        \Log::debug('Pandoc command: ' . $commandString);
+        \Log::debug('Bibliography entries: ' . json_encode($bibliography));
+
         $result = Process::env([
             'PATH' => '/usr/bin:/usr/local/bin:/bin',
             'HOME' => sys_get_temp_dir(),
-        ])->run(implode(' ', array_map('escapeshellarg', $command)));
+        ])->run($commandString);
 
         // Clean up temp markdown file
         @unlink($tempMd);
@@ -67,6 +84,65 @@ class PandocPdfGenerator
         }
 
         return $tempPdf;
+    }
+
+    /**
+     * Extract bibliography entries from markdown
+     * Format: [bib]: Entry text
+     */
+    protected function extractBibliography(string $markdown, array &$bibliography): string
+    {
+        // Normalize line endings
+        $markdown = str_replace("\r\n", "\n", $markdown);
+        $markdown = str_replace("\r", "\n", $markdown);
+
+        // Debug: log first and last 500 chars to see content
+        \Log::debug('Raw content (first 500 chars): ' . substr($markdown, 0, 500));
+        \Log::debug('Raw content (last 1000 chars): ' . substr($markdown, -1000));
+        \Log::debug('Looking for [bib]: pattern...');
+
+        // Match [bib]: Entry text lines (allow leading whitespace, case insensitive)
+        if (preg_match_all('/^\s*\[bib\]:\s*(.+)$/im', $markdown, $matches)) {
+            \Log::debug('Found ' . count($matches[1]) . ' bibliography entries');
+            foreach ($matches[1] as $entry) {
+                $entry = trim($entry);
+                if (!empty($entry)) {
+                    // Escape special characters for LaTeX (but not backslash)
+                    $entry = $this->escapeLatexForBibliography($entry);
+                    // Convert markdown italics to LaTeX
+                    $entry = preg_replace('/\*([^*]+)\*/', '\\textit{$1}', $entry);
+                    $bibliography[] = $entry;
+                }
+            }
+            // Remove bibliography lines from main content
+            $markdown = preg_replace('/^\s*\[bib\]:\s*.+$/im', '', $markdown);
+        } else {
+            \Log::debug('No [bib]: entries found');
+            // Check if bib appears at all
+            if (strpos($markdown, 'bib') !== false) {
+                \Log::debug('Found "bib" somewhere in content');
+            }
+        }
+
+        // Sort bibliography alphabetically
+        sort($bibliography);
+
+        return trim($markdown);
+    }
+
+    /**
+     * Escape LaTeX characters for bibliography (preserves backslash for commands)
+     */
+    protected function escapeLatexForBibliography(string $text): string
+    {
+        $replacements = [
+            '&' => '\\&',
+            '%' => '\\%',
+            '#' => '\\#',
+            '_' => '\\_',
+        ];
+
+        return str_replace(array_keys($replacements), array_values($replacements), $text);
     }
 
     /**
